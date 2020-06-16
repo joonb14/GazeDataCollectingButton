@@ -14,7 +14,7 @@ I only ask for Camera permission on the runtime. So you need to check permission
 This app is based on Pixel 3 XL specifically. <br>
 So if you are using other device, you have to change Button's left right margins<br>
 Please take a look at Camera2BasicFragment.java Line 960 onClick Mehod. At Line 967,968,969 you should change the button size and margins. Also should look into topmargin and leftmargin varaibles <br><br>
-<img width="800" src="https://user-images.githubusercontent.com/30307587/84727100-48a0b380-afc9-11ea-89f7-44e4161528ad.png">
+<img width="800" src="https://user-images.githubusercontent.com/30307587/84727100-48a0b380-afc9-11ea-89f7-44e4161528ad.png"><br>
 If installed app captures Rear camera image, then you have to change the value at <br>Camera2BasicFragement.java Line 894~ if (mCameraId.equals("1")) ...... check what number equals to your device's front camera.
 ### Frame Resolution
 My app's default Capturing frame resolution is 640x480.<br>
