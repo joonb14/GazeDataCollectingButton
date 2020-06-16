@@ -891,10 +891,12 @@ public class Camera2BasicFragment extends Fragment
             Date now = new Date();
             String gyroData = CameraActivity.getGyroData();
             String acceleroData = CameraActivity.getAcceleroData();
+            int positionX = leftmargin;
+            int positionY = topmargin;
             if (mCameraId.equals("1")) {
-                mFile = new File("/sdcard/CaptureApp/", "pic_front_"+formatter.format(now)+"_"+pictureCount+"_"+leftmargin+"_"+topmargin+"_"+gyroData+"_"+acceleroData+".jpg");}
+                mFile = new File("/sdcard/CaptureApp/", "pic_front_"+formatter.format(now)+"_"+pictureCount+"_"+positionX+"_"+positionY+"_"+gyroData+"_"+acceleroData+".jpg");}
             else {
-                mFile = new File("/sdcard/CaptureApp/", "pic_front_wide_"+formatter.format(now)+"_"+pictureCount+"_"+leftmargin+"_"+topmargin+"_"+gyroData+"_"+acceleroData+".jpg");
+                mFile = new File("/sdcard/CaptureApp/", "pic_front_wide_"+formatter.format(now)+"_"+pictureCount+"_"+positionX+"_"+positionY+"_"+gyroData+"_"+acceleroData+".jpg");
             }
             pictureCount++;
 
@@ -955,7 +957,7 @@ public class Camera2BasicFragment extends Fragment
 //            e.printStackTrace();
 //        }
 //    }
-
+    private int buttonsize;
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -983,8 +985,8 @@ public class Camera2BasicFragment extends Fragment
 //                        }
                         int row =rand.nextInt(7)+1; //1~7
                         int col =rand.nextInt(5)+1; //1~4
-                        int topmargin = 100+row*top_margin+button_size*(row-1)+button_size/2;
-                        int leftmargin = col*left_margin+button_size*(col-1)+button_size/2;
+                        int topmargin = 100+(row-1)*top_margin+button_size*(row-1);
+                        int leftmargin = col*left_margin+button_size*(col-1);
                         params.topMargin = topmargin;
                         params.leftMargin = leftmargin;
                         myBtn.setLayoutParams(params);
