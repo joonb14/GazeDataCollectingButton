@@ -965,8 +965,8 @@ public class Camera2BasicFragment extends Fragment
 //                myBtn.setClickable(false);
                 params = (RelativeLayout.LayoutParams)myBtn.getLayoutParams();
                 final int button_size = 224;
-                final int left_padding = 53;
-                final int top_padding = 136;
+                final int left_margin = 53;
+                final int top_margin = 136;
                 leftmargin = params.leftMargin + button_size/2;
                 topmargin = params.topMargin + button_size/2;
                 Log.d(TAG, leftmargin+","+topmargin);
@@ -983,8 +983,8 @@ public class Camera2BasicFragment extends Fragment
 //                        }
                         int row =rand.nextInt(7)+1; //1~7
                         int col =rand.nextInt(5)+1; //1~4
-                        int topmargin = 100+row*top_padding+button_size*(row-1)+button_size/2;
-                        int leftmargin = col*left_padding+button_size*(col-1)+button_size/2;
+                        int topmargin = 100+row*top_margin+button_size*(row-1)+button_size/2;
+                        int leftmargin = col*left_margin+button_size*(col-1)+button_size/2;
                         params.topMargin = topmargin;
                         params.leftMargin = leftmargin;
                         myBtn.setLayoutParams(params);
