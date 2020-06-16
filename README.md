@@ -6,14 +6,15 @@ The Result app looks like this <br><br>
 <img width="300" src="https://user-images.githubusercontent.com/30307587/84726473-e3988e00-afc7-11ea-8546-8979ed3d6cbe.png">
 <img width="300" src="https://user-images.githubusercontent.com/30307587/84726474-e4312480-afc7-11ea-8e20-4b3994f52f72.png">
 ### Application Details
-This app collects Front Facing Camera Frame, Gyroscope, Accelerometer, touch (X,Y) position whenever you touch the button. In order to process and save Front Facing Camera Frame, I delayed starting new Activity by 1sec(1000ms). Otherwise you will face errors such as Camera Handler trying to send message to dead thread.The button will randomly appear in 5 x 7 grid.
-<img width="800" src="https://user-images.githubusercontent.com/30307587/84727100-48a0b380-afc9-11ea-89f7-44e4161528ad.png">
+This app collects Front Facing Camera Frame, Gyroscope, Accelerometer, touch (X,Y) position whenever you touch the button. In order to process and save Front Facing Camera Frame, I delayed starting new Activity by 1sec(1000ms). Otherwise you will face errors such as Camera Handler trying to send message to dead thread.<br>
+The button will randomly appear in 5 x 7 grid.
 ### Check the Permissions before using the APP
 I only ask for Camera permission on the runtime. So you need to check permissions in Application info, and grant External storage R/W permissions before you try collecting data
 ### Needs Modification for Others to Use
 This app is based on Pixel 3 XL specifically. <br>
 So if you are using other device, you have to change Button's left right margins<br>
-Please take a look at Camera2BasicFragment.java Line 960 onClick Mehod. At Line 967,968,969 you should change the button size and paddings. <br>
+Please take a look at Camera2BasicFragment.java Line 960 onClick Mehod. At Line 967,968,969 you should change the button size and margins. Also should look into topmargin and leftmargin varaibles <br><br>
+<img width="800" src="https://user-images.githubusercontent.com/30307587/84727100-48a0b380-afc9-11ea-89f7-44e4161528ad.png">
 If installed app captures Rear camera image, then you have to change the value at <br>Camera2BasicFragement.java Line 894~ if (mCameraId.equals("1")) ...... check what number equals to your device's front camera.
 ### Frame Resolution
 My app's default Capturing frame resolution is 640x480.<br>
