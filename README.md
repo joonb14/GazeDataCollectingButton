@@ -6,7 +6,7 @@ The Result app looks like this <br><br>
 <img width="300" src="https://user-images.githubusercontent.com/30307587/84726473-e3988e00-afc7-11ea-8546-8979ed3d6cbe.png">
 <img width="300" src="https://user-images.githubusercontent.com/30307587/84726474-e4312480-afc7-11ea-8e20-4b3994f52f72.png">
 ### Application Details
-This app collects Front Facing Camera Frame, Gyroscope, Accelerometer, touch (X,Y) position whenever you touch the items in launcher. In order to process and save Front Facing Camera Frame, I delayed starting new Activity by 1sec(1000ms). Otherwise you will face errors such as Camera Handler trying to send message to dead thread.
+This app collects Front Facing Camera Frame, Gyroscope, Accelerometer, touch (X,Y) position whenever you touch the button. In order to process and save Front Facing Camera Frame, I delayed starting new Activity by 1sec(1000ms). Otherwise you will face errors such as Camera Handler trying to send message to dead thread.The button will randomly appear in 5 x 7 grid.
 ### Check the Permissions before using the APP
 I only ask for Camera permission on the runtime. So you need to check permissions in Application info, and grant External storage R/W permissions before you try collecting data
 ### Needs Modification for Others to Use
