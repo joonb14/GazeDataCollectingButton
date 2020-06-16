@@ -2,9 +2,9 @@
 ### This app is based on following examples
 Camera2Api: https://github.com/android/camera-samples/tree/master/Camera2Basic <br>
 The Result app looks like this <br><br>
-<img width="300" src="https://user-images.githubusercontent.com/30307587/84726470-e2fff780-afc7-11ea-98d1-72bce874c28e.png">
-<img width="300" src="https://user-images.githubusercontent.com/30307587/84726473-e3988e00-afc7-11ea-8546-8979ed3d6cbe.png">
-<img width="300" src="https://user-images.githubusercontent.com/30307587/84726474-e4312480-afc7-11ea-8e20-4b3994f52f72.png">
+<img width="300" src="https://user-images.githubusercontent.com/30307587/84738277-95de4e80-afe4-11ea-8ecb-fb3cd6bec28a.png">
+<img width="300" src="https://user-images.githubusercontent.com/30307587/84738280-9676e500-afe4-11ea-8dba-6a6516e1aeb8.png">
+<img width="300" src="https://user-images.githubusercontent.com/30307587/84738282-970f7b80-afe4-11ea-822c-ed284de1b6a0.png">
 ### Application Details
 This app collects Front Facing Camera Frame, Gyroscope, Accelerometer, touch (X,Y) position whenever you touch the button. In order to process and save Front Facing Camera Frame, I delayed starting new Activity by 1sec(1000ms). Otherwise you will face errors such as Camera Handler trying to send message to dead thread.<br>
 The button will randomly appear in 5 x 7 grid.
