@@ -18,6 +18,7 @@ package com.example.android.camera2basic;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,6 +26,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+
+import java.io.File;
+import java.io.IOException;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -44,6 +48,20 @@ public class CameraActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //MOBED
+        String dir_path = Environment.getExternalStorageDirectory() + "/CaptureApp";
+
+        if (!dir_exists(dir_path)){
+            File directory = new File(dir_path);
+            directory.mkdirs();
+        }
+
+        File file = new File("sdcard/CaptureApp/.nomedia");
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         int densityDpi = (int)(metrics.density * 160f);
         Log.d("MOBED","DPI: "+Integer.toString(densityDpi));
@@ -59,6 +77,15 @@ public class CameraActivity extends AppCompatActivity {
         mGyroSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+    }
+
+    public boolean dir_exists(String dir_path)
+    {
+        boolean ret = false;
+        File dir = new File(dir_path);
+        if(dir.exists() && dir.isDirectory())
+            ret = true;
+        return ret;
     }
 
     public void onResume() {
