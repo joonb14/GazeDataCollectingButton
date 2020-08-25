@@ -16,9 +16,16 @@
 
 package com.example.android.camera2basic;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -32,10 +39,20 @@ import java.io.IOException;
 
 public class CameraActivity extends AppCompatActivity {
 
+    private String TAG = "MOBED";
     private SensorManager mSensorManager;
+    private static int count;
+    private static SharedPreferences sf;
+    private static final String[] PERMISSIONS = new String[] {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+    };
+    private static final int REQ_PERMISSION = 1000;
 
     private Sensor mGyroSensor = null;
     private Sensor mAccelerometer = null;
+    private Sensor mRotationVector = null;
 
     private static double gyroX;
     private static double gyroY;
@@ -44,6 +61,13 @@ public class CameraActivity extends AppCompatActivity {
     private  static double accX;
     private  static double accY;
     private  static double accZ;
+
+    private  static float pitch;
+    private  static float roll;
+
+    //private static final float RADIAN_TO_DEGREE= (float) -57.2958;
+    private static final int RADIAN_TO_DEGREE= -57;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,9 +86,9 @@ public class CameraActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        int densityDpi = (int)(metrics.density * 160f);
-        Log.d("MOBED","DPI: "+Integer.toString(densityDpi));
+        sf = getPreferences(Context.MODE_PRIVATE);
+        count = sf.getInt("count",0);
+        checkPermission();
 
         setContentView(R.layout.activity_camera);
         if (null == savedInstanceState) {
@@ -76,6 +100,7 @@ public class CameraActivity extends AppCompatActivity {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mGyroSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mRotationVector = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
     }
 
@@ -88,16 +113,79 @@ public class CameraActivity extends AppCompatActivity {
         return ret;
     }
 
+
+    public static int getCount(){
+        count = sf.getInt("count",0);
+        return count;
+    }
+
+    public static SharedPreferences getSF(){
+        return sf;
+    }
+
+    public static int addCount(){
+        count+=1;
+        SharedPreferences.Editor editor = sf.edit();
+        editor.putInt("count",count);
+        editor.commit();
+        return count;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private boolean hasPermissions(String[] permissions) {
+        int result;
+        // Check permission status in string array
+        for (String perms : permissions) {
+            if (perms.equals(Manifest.permission.SYSTEM_ALERT_WINDOW)) {
+                if (!Settings.canDrawOverlays(this)) {
+                    return false;
+                }
+            }
+            result = ContextCompat.checkSelfPermission(this, perms);
+            if (result == PackageManager.PERMISSION_DENIED) {
+                // When if unauthorized permission found
+                return false;
+            }
+        }
+        // When if all permission allowed
+        return true;
+    }
+
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Check permission status
+            if (!hasPermissions(PERMISSIONS)) {
+
+                requestPermissions(PERMISSIONS, REQ_PERMISSION);
+            } else {
+                checkPermission(true);
+            }
+        } else {
+            checkPermission(true);
+        }
+    }
+
+    private void checkPermission(boolean isGranted) {
+        if (isGranted) {
+            //
+        } else {
+            Log.d(TAG, "not granted permissions");
+            finish();
+        }
+    }
+
     public void onResume() {
         super.onResume();
-        mSensorManager.registerListener(gyroListener, mGyroSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(acceleroListener, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(gyroListener, mGyroSensor, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(acceleroListener, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(rotationListener, mRotationVector, SensorManager.SENSOR_DELAY_GAME);
     }
 
     public void onStop() {
         super.onStop();
         mSensorManager.unregisterListener(gyroListener);
         mSensorManager.unregisterListener(acceleroListener);
+        mSensorManager.unregisterListener(rotationListener);
     }
     public SensorEventListener gyroListener = new SensorEventListener() {
         public void onAccuracyChanged(Sensor mGyroSensor, int acc) {
@@ -121,10 +209,50 @@ public class CameraActivity extends AppCompatActivity {
             //Log.d("MOBED","Accelerometer: "+accX+ " "+accY+" "+accZ+"m/s^2");
         }
     };
+
+    //Copied from https://rosia.tistory.com/128
+    public SensorEventListener rotationListener = new SensorEventListener() {
+        public void onAccuracyChanged(Sensor mRotationVector, int acc) {
+        }
+
+        public void onSensorChanged(SensorEvent event) {
+            if(event.values.length>4) {
+                //Log.d(TAG,"Rotation Vector event.values[0]: "+event.values[0]+" event.values[1]: "+event.values[1]+" event.values[2]: "+event.values[2]+" event.values[3]: "+event.values[3]);
+                checkOrientation(event.values);
+            }
+        }
+    };
+
+    private void checkOrientation(float[] rotationVector) {
+        float[] rotationMatrix = new float[9];
+        SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVector);
+
+        final int worldAxisForDeviceAxisX = SensorManager.AXIS_X;
+        final int worldAxisForDeviceAxisY = SensorManager.AXIS_Z;
+
+
+
+        float[] adjustedRotationMatrix = new float[9];
+        SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX,
+                worldAxisForDeviceAxisY, adjustedRotationMatrix);
+
+        // Transform rotation matrix into azimuth/pitch/roll
+        float[] orientation = new float[3];
+        SensorManager.getOrientation(adjustedRotationMatrix, orientation);
+
+        // Convert radians to degrees
+        pitch = orientation[1] * RADIAN_TO_DEGREE;
+        roll = orientation[2] * RADIAN_TO_DEGREE;
+        //Log.d(TAG,"Rotation Vector Pitch: "+pitch+" Roll: "+roll);
+    }
+
     public static String getGyroData(){
-        return gyroX+ "_"+gyroY+"_"+gyroZ;
+        return gyroX+ ","+gyroY+","+gyroZ;
     }
     public static String getAcceleroData(){
-        return accX+ "_"+accY+"_"+accZ;
+        return accX+ ","+accY+","+accZ;
+    }
+    public static String getOrientation(){
+        return pitch+ ","+roll;
     }
 }

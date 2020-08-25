@@ -36,6 +36,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
@@ -73,8 +74,10 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -179,10 +182,6 @@ public class Camera2BasicFragment extends Fragment
      */
     private String mCameraId;
 
-    /**
-     * # of saved picture
-     */
-    private int pictureCount = 0;
 
     /**
      * An {@link AutoFitTextureView} for camera preview.
@@ -211,6 +210,8 @@ public class Camera2BasicFragment extends Fragment
     private RelativeLayout.LayoutParams params;
     private int leftmargin;
     private int topmargin;
+    private int save_gazeX;
+    private int save_gazeY;
 
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its state.
@@ -260,10 +261,6 @@ public class Camera2BasicFragment extends Fragment
      */
     private ImageReader mImageReader;
 
-    /**
-     * An {@link ImageReader} that handles still image capture.
-     */
-    private ImageReader mWideImageReader;
 
     /**
      * This is the output file for our picture.
@@ -555,10 +552,6 @@ public class Camera2BasicFragment extends Fragment
                 mImageReader = ImageReader.newInstance(480, 640, ImageFormat.JPEG, /*maxImages*/2);
                 mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
 
-                //MOBED for Multi Camera API
-                mWideImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.JPEG, /*maxImages*/2);
-                mWideImageReader.setOnImageAvailableListener(mOnImageAvailableListener, mBackgroundHandler);
-
                 // Find out if we need to swap dimension to get the preview size relative to sensor
                 // coordinate.
                 int displayRotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -680,9 +673,6 @@ public class Camera2BasicFragment extends Fragment
             if (null != mImageReader) {
                 mImageReader.close();
                 mImageReader = null;
-            }if (null != mWideImageReader) {
-                mWideImageReader.close();
-                mWideImageReader = null;
             }
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
@@ -889,16 +879,19 @@ public class Camera2BasicFragment extends Fragment
             // File Name
             SimpleDateFormat formatter = new SimpleDateFormat("MMddHHmmss", Locale.KOREA);
             Date now = new Date();
-            String gyroData = CameraActivity.getGyroData();
-            String acceleroData = CameraActivity.getAcceleroData();
-            int positionX = leftmargin;
-            int positionY = topmargin;
+            save_gazeX = leftmargin;
+            save_gazeY = topmargin;
+            /**
+             * # of saved picture
+             */
+            int pictureCount = CameraActivity.getCount();
             if (mCameraId.equals("1")) {
-                mFile = new File("/sdcard/CaptureApp/", "pic_front_"+formatter.format(now)+"_"+pictureCount+"_"+positionX+"_"+positionY+"_"+gyroData+"_"+acceleroData+".jpg");}
-            else {
-                mFile = new File("/sdcard/CaptureApp/", "pic_front_wide_"+formatter.format(now)+"_"+pictureCount+"_"+positionX+"_"+positionY+"_"+gyroData+"_"+acceleroData+".jpg");
+                mFile = new File("/sdcard/CaptureApp/", pictureCount+".jpg");
             }
-            pictureCount++;
+            else {
+                mFile = new File("/sdcard/CaptureApp/", pictureCount+".jpg");
+            }
+            CameraActivity.addCount();
 
             CameraCaptureSession.CaptureCallback captureCallback
                     = new CameraCaptureSession.CaptureCallback() {
@@ -907,10 +900,21 @@ public class Camera2BasicFragment extends Fragment
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-                    showToast("Saved: " + mFile);
-                    Log.d(TAG, mFile.toString());
-//                    disabled_flag = false;
-//                    myBtn.setClickable(true);
+                    Log.d(TAG,"Saved: " + mFile);
+                    int pictureCount = CameraActivity.getCount();
+                    String gyroData = CameraActivity.getGyroData();
+                    String acceleroData = CameraActivity.getAcceleroData();
+                    String rotationData = CameraActivity.getOrientation();
+                    appendLog(pictureCount+","+save_gazeX+","+save_gazeY+","+rotationData+","+gyroData+","+acceleroData);
+                    //unlockFocus();
+                }
+
+                @Override
+                public void onCaptureFailed(@NonNull CameraCaptureSession session,
+                                               @NonNull CaptureRequest request,
+                                               @NonNull CaptureFailure failure) {
+                    Log.d(TAG,"Save Failed: " + mFile);
+                    myBtn.setClickable(true);
                     //unlockFocus();
                 }
             };
@@ -983,8 +987,9 @@ public class Camera2BasicFragment extends Fragment
 //                            params.leftMargin = rand.nextInt(1301);
 //                            myBtn.setLayoutParams(params);
 //                        }
-                        int row =rand.nextInt(7)+1; //1~7
-                        int col =rand.nextInt(5)+1; //1~4
+                        int num = rand.nextInt(35);
+                        int row =num%7+1; //1~7
+                        int col =num%5+1; //1~5
                         int topmargin = 100+(row-1)*top_margin+button_size*(row-1);
                         int leftmargin = col*left_margin+button_size*(col-1);
                         params.topMargin = topmargin;
@@ -1123,6 +1128,41 @@ public class Camera2BasicFragment extends Fragment
                                 }
                             })
                     .create();
+        }
+    }
+
+
+    public void appendLog(String text)
+    {
+        File logFile = new File("sdcard/CaptureApp/log.csv");
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.createNewFile();
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append("count,gazeX,gazeY,pitch,roll,gyroX,gyroY,gyroZ,accelX,accelY,accelZ");
+                buf.newLine();
+                buf.close();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
