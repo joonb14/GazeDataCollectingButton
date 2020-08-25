@@ -3,6 +3,7 @@
 Camera2Api: https://github.com/android/camera-samples/tree/master/Camera2Basic <br>
 The Result app looks like this <br>
 We Changed the app to store Rotation Vector values as pitch and yaw and seperated log file and image file<br>
+So it won't show up the toast messages like below<br><br>
 <img width="300" src="https://user-images.githubusercontent.com/30307587/84738282-970f7b80-afe4-11ea-822c-ed284de1b6a0.png">
 <img width="300" src="https://user-images.githubusercontent.com/30307587/84738277-95de4e80-afe4-11ea-8ecb-fb3cd6bec28a.png">
 <img width="300" src="https://user-images.githubusercontent.com/30307587/84738280-9676e500-afe4-11ea-8dba-6a6516e1aeb8.png">
